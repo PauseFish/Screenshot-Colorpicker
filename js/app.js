@@ -19,6 +19,7 @@ const $  = id => document.getElementById(id);
 const $$ = sel => document.querySelectorAll(sel);
 
 const uploadSection    = $('uploadSection');
+const workspace        = $('workspace');
 const dropZone         = $('dropZone');
 const fileInput        = $('fileInput');
 const browseBtn        = $('browseBtn');
@@ -29,7 +30,6 @@ const fileNameEl       = $('fileName');
 const changeImageBtn   = $('changeImageBtn');
 const fitContainBtn    = $('fitContain');
 const fitCoverBtn      = $('fitCover');
-const optionsSection   = $('optionsSection');
 const numColorsSelect  = $('numColors');
 const sortBySelect     = $('sortBy');
 const sampleQuality    = $('sampleQuality');
@@ -48,6 +48,7 @@ const showHexOnExport  = $('showHexOnExport');
 const exportBtn        = $('exportBtn');
 const extractCanvas    = $('extractCanvas');
 const toastEl          = $('toast');
+// showHexOnExport removed — export never includes hex labels
 
 /* ================================================================
    File Input / Upload
@@ -83,14 +84,13 @@ function loadFile(file) {
       fileNameEl.textContent = file.name;
 
       uploadSection.hidden  = true;
-      previewSection.hidden = false;
-      optionsSection.hidden = false;
+      workspace.hidden      = false;
       paletteSection.hidden = true;
       exportSection.hidden  = true;
       state.originalPalette = [];
       state.palette = [];
 
-      previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      workspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
     previewImage.src = ev.target.result;
   };
@@ -399,18 +399,17 @@ $$('.layout-btn').forEach(btn =>
 exportBtn.addEventListener('click', () => {
   if (!state.palette.length) return;
   const { format, exportSize: sz, layout } = state;
-  const withHex = showHexOnExport.checked;
-  if (format === 'png') exportAsPng(sz, layout, withHex);
-  else                  exportAsSvg(sz, layout, withHex);
+  if (format === 'png') exportAsPng(sz, layout);
+  else                  exportAsSvg(sz, layout);
 });
 
 /* ================================================================
    Export — PNG
    ================================================================ */
-function exportAsPng(size, layout, withHex) {
+function exportAsPng(size, layout) {
   const c = document.createElement('canvas');
   c.width = c.height = size;
-  drawPalette(c.getContext('2d'), state.palette, size, size, layout, withHex);
+  drawPalette(c.getContext('2d'), state.palette, size, size, layout);
   c.toBlob(blob => {
     download(URL.createObjectURL(blob), `palette-${size}x${size}.png`);
   }, 'image/png');
@@ -419,12 +418,11 @@ function exportAsPng(size, layout, withHex) {
 /* ================================================================
    Export — SVG
    ================================================================ */
-function exportAsSvg(size, layout, withHex) {
-  const body = buildSvgShapes(state.palette, size, size, layout, withHex);
+function exportAsSvg(size, layout) {
+  const shapes = buildSvgShapes(state.palette, size, size, layout);
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  <rect width="${size}" height="${size}" fill="#161b22"/>
-  ${body}
+  ${shapes}
 </svg>`;
   download(URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' })),
            `palette-${size}x${size}.svg`);
@@ -432,116 +430,60 @@ function exportAsSvg(size, layout, withHex) {
 
 /* ================================================================
    Drawing — Canvas
+   Cells are flush edge-to-edge: no padding, no gap, no rounded corners.
+   Pixel boundaries are snapped to integers to avoid sub-pixel gaps.
    ================================================================ */
-function drawPalette(ctx, palette, W, H, layout, withHex) {
-  const { pad, gap, iW, iH } = metrics(W, H);
-  ctx.fillStyle = '#161b22';
-  ctx.fillRect(0, 0, W, H);
-
+function drawPalette(ctx, palette, W, H, layout) {
   if (layout === 'grid') {
-    const cols   = Math.ceil(Math.sqrt(palette.length));
-    const rows   = Math.ceil(palette.length / cols);
-    const cellW  = (iW - gap * (cols - 1)) / cols;
-    const cellH  = (iH - gap * (rows - 1)) / rows;
-    const lblH   = withHex ? clamp(cellH * 0.22, 10, 18) : 0;
-    const colorH = cellH - lblH;
-
+    const cols = Math.ceil(Math.sqrt(palette.length));
+    const rows = Math.ceil(palette.length / cols);
     palette.forEach((color, i) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
-      const x   = pad + col * (cellW + gap);
-      const y   = pad + row * (cellH + gap);
-      const hex = toHex(color).toUpperCase();
-
-      roundRect(ctx, x, y, cellW, colorH, 3);
-      ctx.fillStyle = hex;
-      ctx.fill();
-
-      if (withHex) {
-        const fs = clamp(cellW / 6, 7, 11);
-        ctx.fillStyle    = labelColor(color);
-        ctx.font         = `${fs}px monospace`;
-        ctx.textAlign    = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(hex, x + cellW / 2, y + colorH + lblH / 2);
-      }
+      // Derive x/y from rounded boundaries so adjacent cells share the same edge pixel
+      const x1 = Math.round(col       * W / cols);
+      const y1 = Math.round(row       * H / rows);
+      const x2 = Math.round((col + 1) * W / cols);
+      const y2 = Math.round((row + 1) * H / rows);
+      ctx.fillStyle = toHex(color);
+      ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
     });
-
   } else {
-    /* Strips layout */
-    const n      = palette.length;
-    const cellH  = (iH - gap * (n - 1)) / n;
-    const lblW   = withHex ? clamp(iW * 0.3, 60, 80) : 0;
-    const colorW = iW - lblW;
-
+    /* Strips */
+    const cnt = palette.length;
     palette.forEach((color, i) => {
-      const y   = pad + i * (cellH + gap);
-      const hex = toHex(color).toUpperCase();
-
-      roundRect(ctx, pad, y, colorW, cellH, 3);
-      ctx.fillStyle = hex;
-      ctx.fill();
-
-      if (withHex) {
-        const fs = clamp(cellH * 0.5, 7, 13);
-        ctx.fillStyle    = '#e6edf3';
-        ctx.font         = `${fs}px monospace`;
-        ctx.textAlign    = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(hex, pad + colorW + gap, y + cellH / 2);
-      }
+      const y1 = Math.round(i       * H / cnt);
+      const y2 = Math.round((i + 1) * H / cnt);
+      ctx.fillStyle = toHex(color);
+      ctx.fillRect(0, y1, W, y2 - y1);
     });
   }
 }
 
 /* ================================================================
    Drawing — SVG shapes string
+   Same flush layout; SVG handles sub-pixel naturally.
    ================================================================ */
-function buildSvgShapes(palette, W, H, layout, withHex) {
-  const { pad, gap, iW, iH } = metrics(W, H);
+function buildSvgShapes(palette, W, H, layout) {
   let out = '';
-
   if (layout === 'grid') {
-    const cols   = Math.ceil(Math.sqrt(palette.length));
-    const rows   = Math.ceil(palette.length / cols);
-    const cellW  = (iW - gap * (cols - 1)) / cols;
-    const cellH  = (iH - gap * (rows - 1)) / rows;
-    const lblH   = withHex ? clamp(cellH * 0.22, 10, 18) : 0;
-    const colorH = cellH - lblH;
-
+    const cols = Math.ceil(Math.sqrt(palette.length));
+    const rows = Math.ceil(palette.length / cols);
     palette.forEach((color, i) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
-      const x   = pad + col * (cellW + gap);
-      const y   = pad + row * (cellH + gap);
-      const hex = toHex(color).toUpperCase();
-
-      out += `<rect x="${n(x)}" y="${n(y)}" width="${n(cellW)}" height="${n(colorH)}" rx="3" fill="${hex}"/>\n`;
-      if (withHex) {
-        const fs = clamp(cellW / 6, 7, 11);
-        out += `<text x="${n(x + cellW/2)}" y="${n(y + colorH + lblH/2)}" ` +
-               `font-family="monospace" font-size="${n(fs)}" fill="${labelColor(color)}" ` +
-               `text-anchor="middle" dominant-baseline="middle">${hex}</text>\n`;
-      }
+      const x = n(col       * W / cols);
+      const y = n(row       * H / rows);
+      const w = n((col + 1) * W / cols - col * W / cols);
+      const h = n((row + 1) * H / rows - row * H / rows);
+      out += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${toHex(color).toUpperCase()}"/>\n`;
     });
-
   } else {
-    const cnt    = palette.length;
-    const cellH  = (iH - gap * (cnt - 1)) / cnt;
-    const lblW   = withHex ? clamp(iW * 0.3, 60, 80) : 0;
-    const colorW = iW - lblW;
-
+    const cnt = palette.length;
     palette.forEach((color, i) => {
-      const y   = pad + i * (cellH + gap);
-      const hex = toHex(color).toUpperCase();
-
-      out += `<rect x="${pad}" y="${n(y)}" width="${n(colorW)}" height="${n(cellH)}" rx="3" fill="${hex}"/>\n`;
-      if (withHex) {
-        const fs = clamp(cellH * 0.5, 7, 13);
-        out += `<text x="${n(pad + colorW + gap)}" y="${n(y + cellH/2)}" ` +
-               `font-family="monospace" font-size="${n(fs)}" fill="#e6edf3" ` +
-               `dominant-baseline="middle">${hex}</text>\n`;
-      }
+      const y = n(i       * H / cnt);
+      const h = n((i + 1) * H / cnt - i * H / cnt);
+      out += `<rect x="0" y="${y}" width="${W}" height="${h}" fill="${toHex(color).toUpperCase()}"/>\n`;
     });
   }
   return out;
@@ -550,39 +492,9 @@ function buildSvgShapes(palette, W, H, layout, withHex) {
 /* ================================================================
    Helpers
    ================================================================ */
-function metrics(W, H) {
-  const pad = Math.max(4, Math.round(W * 0.03));
-  const gap = Math.max(2, Math.round(W * 0.012));
-  return { pad, gap, iW: W - pad * 2, iH: H - pad * 2 };
-}
-
-function clamp(val, lo, hi) { return Math.max(lo, Math.min(hi, val)); }
 
 /** Round a number to 2 decimal places for SVG attribute cleanliness */
 const n = v => parseFloat(v.toFixed(2));
-
-/** Pick black or white label based on colour luminance */
-function labelColor(color) { return luma(color) > 128 ? '#0d1117' : '#e6edf3'; }
-
-/** Cross-browser rounded rectangle path */
-function roundRect(ctx, x, y, w, h, r) {
-  if (ctx.roundRect) {
-    ctx.beginPath();
-    ctx.roundRect(x, y, w, h, r);
-  } else {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-  }
-}
 
 function download(url, filename) {
   const a = Object.assign(document.createElement('a'), { href: url, download: filename });

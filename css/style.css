@@ -221,10 +221,42 @@ body {
   white-space: nowrap;
 }
 
+/* -- Workspace (50/50 split) ------------------------------------- */
+.workspace {
+  display: flex;
+  gap: var(--gap-lg);
+  height: calc(100vh - 130px);
+  min-height: 500px;
+  align-items: stretch;
+}
+
+/* Left pane: preview card stretched to full workspace height */
+.workspace-preview {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.workspace-preview .image-container {
+  flex: 1;
+  height: 0;        /* override the standalone 800px; flex:1 fills remaining */
+}
+
+/* Right pane: scrollable sidebar */
+.workspace-sidebar {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-lg);
+}
+
 /* -- Image Container --------------------------------------------- */
 .image-container {
   width: 100%;
-  height: 800px;
+  height: 800px;    /* used when standalone; overridden inside .workspace */
   background: #000;
   display: flex;
   align-items: center;
@@ -557,8 +589,18 @@ body {
   .app-header { padding: var(--gap) var(--gap-lg); }
   .app-main   { padding: var(--gap) var(--gap-lg); }
   .card-body  { padding: var(--gap); }
-  .image-container { height: 50vw; min-height: 240px; }
   .options-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Stack workspace vertically on narrow screens */
+  .workspace {
+    flex-direction: column;
+    height: auto;
+  }
+  .workspace-preview .image-container {
+    height: 56vw;   /* restore a sensible fixed height when stacked */
+    flex: none;
+  }
+  .workspace-sidebar { overflow-y: visible; }
 }
 
 @media (max-width: 560px) {
