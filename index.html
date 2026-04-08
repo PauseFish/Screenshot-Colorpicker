@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Screenshot Color Picker</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <h1 class="app-title">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
+        <circle cx="7.5" cy="10.5" r="1" fill="currentColor"/><circle cx="10.5" cy="7.5" r="1" fill="currentColor"/>
+        <circle cx="14.5" cy="7.5" r="1" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1" fill="currentColor"/>
+      </svg>
+      Screenshot Color Picker
+    </h1>
+    <p class="app-subtitle">Upload a screenshot to extract its dominant color palette</p>
+  </div>
+</header>
+
+<main class="app-main">
+
+  <!-- ── Upload ─────────────────────────────────────────────────── -->
+  <section class="card" id="uploadSection">
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-zone-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="M21 15l-5-5L5 21"/>
+        </svg>
+      </div>
+      <p class="drop-zone-title">Drop your screenshot here</p>
+      <p class="drop-zone-hint">or <span class="link-btn" id="browseBtn" role="button" tabindex="0">browse a file</span></p>
+      <p class="drop-zone-types">PNG · JPG · GIF · WebP · BMP</p>
+    </div>
+  </section>
+
+  <!-- ── Preview ────────────────────────────────────────────────── -->
+  <section class="card" id="previewSection" hidden>
+    <div class="preview-bar">
+      <span class="file-name" id="fileName"></span>
+      <div class="preview-bar-end">
+        <span class="control-label">Fit</span>
+        <div class="btn-group">
+          <button class="btn-group-item active" id="fitContain" type="button">Contain</button>
+          <button class="btn-group-item" id="fitCover" type="button">Cover</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="changeImageBtn" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          Change Image
+        </button>
+      </div>
+    </div>
+    <div class="image-container" id="imageContainer">
+      <img id="previewImage" src="" alt="Screenshot preview">
+    </div>
+  </section>
+
+  <!-- ── Extraction Options ─────────────────────────────────────── -->
+  <section class="card" id="optionsSection" hidden>
+    <div class="card-header">
+      <h2 class="card-title">Extraction Options</h2>
+    </div>
+    <div class="card-body">
+      <div class="options-grid">
+
+        <div class="option-group">
+          <label class="option-label" for="numColors">Colors to extract</label>
+          <select id="numColors" class="select">
+            <option value="8">8 colors</option>
+            <option value="16" selected>16 colors</option>
+            <option value="32">32 colors</option>
+          </select>
+        </div>
+
+        <div class="option-group">
+          <label class="option-label" for="sortBy">Sort palette by</label>
+          <select id="sortBy" class="select">
+            <option value="frequency">Frequency (dominant first)</option>
+            <option value="hue">Hue</option>
+            <option value="brightness">Brightness (bright first)</option>
+            <option value="saturation">Saturation (vivid first)</option>
+          </select>
+        </div>
+
+        <div class="option-group">
+          <label class="option-label" for="sampleQuality">
+            Sample quality &nbsp;<span class="badge" id="sampleQualityVal">5</span>
+          </label>
+          <input type="range" id="sampleQuality" class="range-input" min="1" max="10" value="5">
+          <span class="option-hint">Higher = more accurate, slightly slower</span>
+        </div>
+
+        <div class="option-group">
+          <label class="option-label">Ignore colors</label>
+          <div class="check-stack">
+            <label class="check-item">
+              <input type="checkbox" id="ignoreNearWhite">
+              <span>Near-white (r,g,b &gt; 220)</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" id="ignoreNearBlack">
+              <span>Near-black (r,g,b &lt; 35)</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" id="ignoreGray">
+              <span>Grays &amp; neutrals (low saturation)</span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+      <button class="btn btn-primary" id="extractBtn" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
+          <circle cx="7.5" cy="10.5" r="1" fill="currentColor"/><circle cx="10.5" cy="7.5" r="1" fill="currentColor"/>
+          <circle cx="14.5" cy="7.5" r="1" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1" fill="currentColor"/>
+        </svg>
+        Extract Colors
+      </button>
+    </div>
+  </section>
+
+  <!-- ── Palette ────────────────────────────────────────────────── -->
+  <section class="card" id="paletteSection" hidden>
+    <div class="card-header">
+      <h2 class="card-title">Extracted Palette</h2>
+      <div class="card-header-end">
+        <span class="control-label">View</span>
+        <div class="btn-group">
+          <button class="btn-group-item active" id="viewSwatches" type="button">Swatches</button>
+          <button class="btn-group-item" id="viewList" type="button">List</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="copyAllBtn" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          Copy All Hex
+        </button>
+      </div>
+    </div>
+    <div class="palette-grid" id="paletteGrid"></div>
+  </section>
+
+  <!-- ── Export ─────────────────────────────────────────────────── -->
+  <section class="card" id="exportSection" hidden>
+    <div class="card-header">
+      <h2 class="card-title">Export Palette</h2>
+    </div>
+    <div class="card-body">
+      <div class="export-row">
+
+        <div class="option-group">
+          <label class="option-label">Format</label>
+          <div class="btn-group">
+            <button class="btn-group-item active format-btn" data-format="png" type="button">PNG</button>
+            <button class="btn-group-item format-btn" data-format="svg" type="button">SVG</button>
+          </div>
+        </div>
+
+        <div class="option-group">
+          <label class="option-label">Size</label>
+          <div class="btn-group">
+            <button class="btn-group-item active size-btn" data-size="256" type="button">256 × 256</button>
+            <button class="btn-group-item size-btn" data-size="512" type="button">512 × 512</button>
+            <button class="btn-group-item size-btn" data-size="1024" type="button">1024 × 1024</button>
+          </div>
+        </div>
+
+        <div class="option-group">
+          <label class="option-label">Layout</label>
+          <div class="btn-group">
+            <button class="btn-group-item active layout-btn" data-layout="grid" type="button">Grid</button>
+            <button class="btn-group-item layout-btn" data-layout="strips" type="button">Strips</button>
+          </div>
+        </div>
+
+        <div class="option-group">
+          <label class="option-label">Labels</label>
+          <label class="check-item">
+            <input type="checkbox" id="showHexOnExport" checked>
+            <span>Show hex codes</span>
+          </label>
+        </div>
+
+      </div>
+      <button class="btn btn-primary" id="exportBtn" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download Palette
+      </button>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<footer class="app-footer">
+  All processing happens entirely in your browser — no images are sent to any server.
+</footer>
+
+<!-- Hidden file input (always in DOM so it can be triggered from anywhere) -->
+<input type="file" id="fileInput" accept="image/*" aria-hidden="true">
+
+<!-- Off-screen canvas for pixel analysis -->
+<canvas id="extractCanvas" aria-hidden="true"></canvas>
+
+<script src="js/app.js"></script>
+</body>
+</html>
