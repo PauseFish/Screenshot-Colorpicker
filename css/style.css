@@ -251,6 +251,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--gap-lg);
+  padding-bottom: var(--gap-lg);
+}
+
+/* Cards must not shrink — sidebar scrolls instead of clipping content */
+.workspace-sidebar > .card {
+  flex-shrink: 0;
 }
 
 /* -- Image Container --------------------------------------------- */
