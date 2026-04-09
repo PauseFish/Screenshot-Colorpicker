@@ -398,17 +398,20 @@ function renderPalette(palette) {
   const total = palette.reduce((s, c) => s + c.count, 0);
 
   for (const color of palette) {
-    const hex = toHex(color);
-    const pct = total > 0 ? ((color.count / total) * 100).toFixed(1) : '0.0';
+    const hex      = toHex(color);
+    const pct      = total > 0 ? ((color.count / total) * 100).toFixed(1) : '0.0';
+    const inTex    = state.textureSlots.some(s => s && toHex(s) === hex);
 
     const swatch = document.createElement('div');
-    swatch.className = 'swatch';
+    swatch.className = 'swatch' + (inTex ? ' in-texture' : '');
     swatch.title     = `${hex.toUpperCase()} · ${pct}%`;
     swatch.draggable = true;
 
     swatch.innerHTML = `
       <div class="swatch-color" style="background:${hex}">
-        <button class="swatch-add" type="button" title="Add to texture">+</button>
+        <button class="swatch-add${inTex ? ' is-remove' : ''}" type="button"
+          title="${inTex ? 'Remove from texture' : 'Add to texture'}"
+        >${inTex ? '×' : '+'}</button>
       </div>
       <div class="swatch-info">
         <span class="swatch-hex">${hex.toUpperCase()}</span>
@@ -422,7 +425,14 @@ function renderPalette(palette) {
 
     swatch.querySelector('.swatch-add').addEventListener('click', e => {
       e.stopPropagation();
-      addToTexture(color);
+      if (state.textureSlots.some(s => s && toHex(s) === hex)) {
+        // Remove all matching slots and refresh
+        state.textureSlots = state.textureSlots.map(s => (s && toHex(s) === hex) ? null : s);
+        renderTextureGrid();
+        showToast(`Removed ${hex.toUpperCase()} from texture`);
+      } else {
+        addToTexture(color);
+      }
     });
 
     swatch.addEventListener('dragstart', e => {
@@ -437,6 +447,12 @@ function renderPalette(palette) {
 
     paletteGrid.appendChild(swatch);
   }
+}
+
+/* Re-render palette swatches to reflect current texture state */
+function refreshPalette() {
+  const img = activeImg();
+  if (img && img.extracted) renderPalette(img.palette);
 }
 
 /* View toggle */
@@ -461,6 +477,8 @@ copyAllBtn.addEventListener('click', () => {
    Texture Builder
    ================================================================ */
 function addToTexture(color) {
+  const hex = toHex(color);
+  if (state.textureSlots.some(s => s && toHex(s) === hex)) return; // already present
   const firstEmpty = state.textureSlots.indexOf(null);
   if (firstEmpty === -1) {
     showToast('Texture is full — clear a slot or increase the grid size.');
@@ -468,7 +486,7 @@ function addToTexture(color) {
   }
   state.textureSlots[firstEmpty] = color;
   renderTextureGrid();
-  showToast(`Added ${toHex(color).toUpperCase()} to texture`);
+  showToast(`Added ${hex.toUpperCase()} to texture`);
 }
 
 function resizeTexture(newN) {
@@ -549,6 +567,9 @@ function renderTextureGrid() {
 
     textureGrid.appendChild(slot);
   });
+
+  // Sync palette swatches to reflect which colors are now in the texture
+  refreshPalette();
 }
 
 /* Grid size preset buttons — also sync the number input */

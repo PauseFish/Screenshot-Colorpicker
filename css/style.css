@@ -62,18 +62,29 @@ body {
 /* -- App Header -------------------------------------------------- */
 .app-header {
   flex-shrink: 0;
-  padding: 0.45rem var(--gap-xl);
+  padding: var(--gap-lg) var(--gap-xl);   /* matches footer vertical padding */
   background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
 
-.app-header-inner { max-width: 1920px; margin: 0 auto; }
+.app-header-inner {
+  max-width: 1920px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+}
 
 .app-title {
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 700;
   color: var(--text);
-  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.app-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 /* -- Main Layout ------------------------------------------------- */
@@ -467,7 +478,7 @@ body {
 /* -- Palette Grid ------------------------------------------------ */
 .palette-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: var(--gap-sm);
   padding: var(--gap);
 }
@@ -477,7 +488,7 @@ body {
   border-radius: var(--r-md);
   overflow: hidden;
   border: 1px solid rgba(255,255,255,0.05);
-  transition: transform var(--t), box-shadow var(--t), border-color var(--t);
+  transition: transform var(--t), box-shadow var(--t), border-color var(--t), opacity var(--t);
   cursor: default;
 }
 .swatch:hover {
@@ -486,54 +497,60 @@ body {
   border-color: rgba(255,255,255,0.15);
 }
 
+/* Swatch already added to the texture — dimmed */
+.swatch.in-texture         { opacity: 0.4; }
+.swatch.in-texture:hover   { opacity: 0.65; }
+
 /* The coloured block */
 .swatch-color {
-  display: block;        /* ← was inline <span>, must be block for height */
-  height: 72px;
+  display: block;
+  height: 58px;
   width: 100%;
   position: relative;
 }
 
-/* "+" overlay button */
+/* "+" / "×" overlay button */
 .swatch-add {
   position: absolute;
-  bottom: 5px;
-  right: 5px;
-  width: 22px;
-  height: 22px;
+  bottom: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: rgba(0,0,0,0.55);
   color: #fff;
   border: 1px solid rgba(255,255,255,0.25);
   cursor: pointer;
-  font-size: 16px;
+  font-size: 13px;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   opacity: 0;
-  transition: opacity var(--t), background var(--t);
+  transition: opacity var(--t), background var(--t), border-color var(--t);
 }
-.swatch:hover .swatch-add       { opacity: 1; }
+.swatch:hover .swatch-add        { opacity: 1; }
 .swatch-add:hover                { background: var(--accent); border-color: var(--accent); opacity: 1; }
+/* Remove-mode (already in texture) */
+.swatch-add.is-remove:hover      { background: #c0392b; border-color: #e74c3c; opacity: 1; }
 
 /* Info row below colour block */
 .swatch-info {
   background: var(--surface-2);
-  padding: 0.4rem 0.55rem;
+  padding: 0.3rem 0.45rem;
   display: flex;
-  flex-direction: column; /* ← stack hex and pct vertically */
+  flex-direction: column;
   gap: 1px;
 }
 
 .swatch-hex {
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   color: var(--text);
 }
 
-.swatch-pct { font-size: 0.7rem; color: var(--text-muted); }
+.swatch-pct { font-size: 0.6rem; color: var(--text-muted); }
 
 /* List view */
 .palette-grid.is-list {
@@ -545,18 +562,18 @@ body {
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  height: 46px;
+  height: 37px;
   border-radius: var(--r-sm);
 }
 .palette-grid.is-list .swatch-color {
   height: 100%;
-  width: 64px;
+  width: 51px;
   flex-shrink: 0;
 }
 .palette-grid.is-list .swatch-add {
-  width: 18px;
-  height: 18px;
-  font-size: 13px;
+  width: 14px;
+  height: 14px;
+  font-size: 11px;
   bottom: 3px;
   right: 3px;
   opacity: 1;           /* always visible in compact list view */
@@ -569,8 +586,8 @@ body {
   padding: 0 0.75rem;
   flex: 1;
 }
-.palette-grid.is-list .swatch-hex { font-size: 0.875rem; }
-.palette-grid.is-list .swatch-pct { font-size: 0.8rem; }
+.palette-grid.is-list .swatch-hex { font-size: 0.8rem; }
+.palette-grid.is-list .swatch-pct { font-size: 0.75rem; }
 
 /* -- Texture Builder -------------------------------------------- */
 
@@ -634,26 +651,28 @@ body {
 
 .texture-slot.is-dragging { opacity: 0.35; }
 
-/* Remove (×) button inside a filled slot */
+/* Remove (×) button inside a filled slot — matches .swatch-add style */
 .slot-remove {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 14px;
-  height: 14px;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.65);
+  background: rgba(0,0,0,0.55);
   color: #fff;
-  border: none;
+  border: 1px solid rgba(255,255,255,0.25);
   cursor: pointer;
-  font-size: 10px;
+  font-size: 13px;
   display: none;           /* shown on hover via parent:hover below */
   align-items: center;
   justify-content: center;
   padding: 0;
   line-height: 1;
+  transition: background var(--t), border-color var(--t);
 }
 .texture-slot.filled:hover .slot-remove { display: flex; }
+.slot-remove:hover { background: #c0392b; border-color: #e74c3c; }
 
 /* Export row at the bottom of texture section */
 .texture-export-row {
