@@ -554,6 +554,12 @@ function renderTextureGrid() {
       if (!drag.active) return;
 
       if (drag.type === 'palette') {
+        const hex = toHex(drag.color);
+        if (state.textureSlots.some(s => s && toHex(s) === hex)) {
+          showToast(`${hex.toUpperCase()} is already in the texture`);
+          drag.active = false;
+          return;
+        }
         state.textureSlots[idx] = drag.color;
       } else if (drag.type === 'slot' && drag.slotIdx !== null && drag.slotIdx !== idx) {
         const tmp = state.textureSlots[idx];
@@ -571,6 +577,11 @@ function renderTextureGrid() {
   // Sync palette swatches to reflect which colors are now in the texture
   refreshPalette();
 }
+
+/* Collapsible card sections */
+$$('.collapse-btn').forEach(btn =>
+  btn.addEventListener('click', () => btn.closest('.card').classList.toggle('is-collapsed'))
+);
 
 /* Grid size preset buttons — also sync the number input */
 $$('.size-tex').forEach(btn =>

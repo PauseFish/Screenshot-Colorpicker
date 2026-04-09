@@ -109,6 +109,13 @@ body {
   overflow: hidden;
 }
 
+/* Collapsible cards — hide everything except the header */
+.card.is-collapsed > *:not(.card-header) { display: none; }
+
+.collapse-btn { padding: 0.2rem 0.35rem; line-height: 0; }
+.collapse-btn svg { display: block; transition: transform 0.2s ease; }
+.card.is-collapsed .collapse-btn svg { transform: rotate(-90deg); }
+
 .card-header {
   display: flex;
   align-items: center;
@@ -221,6 +228,18 @@ body {
 
 /* Cards must not shrink — sidebar scrolls instead of clipping */
 .workspace-sidebar > .card { flex-shrink: 0; }
+
+/* Palette + Texture side by side */
+.palette-texture-row {
+  display: flex;
+  gap: var(--gap-lg);
+  flex-shrink: 0;
+  min-width: 0;
+}
+.palette-texture-row > .card {
+  flex: 1 1 0;
+  min-width: 0;
+}
 
 /* -- Preview Bar ------------------------------------------------- */
 .preview-bar {
@@ -738,6 +757,7 @@ body {
   .workspace-left { flex: none; }
   .workspace-preview { flex: none; }
   .workspace-preview .image-container { height: 56vw; flex: none; }
+  .palette-texture-row { flex-direction: column; }
   .workspace-sidebar { overflow-y: visible; }
 }
 

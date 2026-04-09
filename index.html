@@ -76,6 +76,9 @@
       <section class="card" id="optionsSection">
         <div class="card-header">
           <h2 class="card-title">Extraction Options</h2>
+          <button class="collapse-btn btn btn-ghost btn-sm" type="button" aria-label="Toggle section">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
         </div>
         <div class="card-body">
           <div class="options-grid">
@@ -130,7 +133,9 @@
         </div>
       </section>
 
-      <!-- ── Extracted Palette ───────────────────────────────────── -->
+      <!-- ── Extracted Palette + Texture Builder (side by side) ─── -->
+      <div class="palette-texture-row">
+
       <section class="card" id="paletteSection" hidden>
         <div class="card-header">
           <h2 class="card-title">Extracted Palette</h2>
@@ -201,10 +206,15 @@
         </div>
       </section>
 
+      </div><!-- /palette-texture-row -->
+
       <!-- ── Export Extracted Palette ───────────────────────────── -->
-      <section class="card" id="exportSection" hidden>
+      <section class="card is-collapsed" id="exportSection" hidden>
         <div class="card-header">
           <h2 class="card-title">Export Palette</h2>
+          <button class="collapse-btn btn btn-ghost btn-sm" type="button" aria-label="Toggle section">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
         </div>
         <div class="card-body">
           <div class="export-row">
