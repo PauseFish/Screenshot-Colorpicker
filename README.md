@@ -44,3 +44,12 @@ To load a second image without losing the first, click **Add Image** - the Sessi
 
 The app is hosted via GitHub Pages:  
 **[https://pausefish.github.io/Screenshot-Colorpicker](https://pausefish.github.io/Screenshot-Colorpicker)**
+
+---
+
+## Licence
+
+This project is licensed under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) licence.
+
+You are free to use, share, and adapt this project for any purpose, including commercially, as long as you give appropriate credit.
+
