@@ -19,7 +19,7 @@ A fully client-side tool for extracting colour palettes from screenshots and bui
 - **Copy hex codes** individually (click a swatch) or all at once
 - 100 % private — all processing happens in your browser; no image is ever sent to a server
 
-![Detail view](docs/screenshot-detail.png)
+![Detail view](docs/screenshot-detail.jpg)
 
 ---
 
