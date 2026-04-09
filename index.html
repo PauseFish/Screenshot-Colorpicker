@@ -10,15 +10,7 @@
 
 <header class="app-header">
   <div class="app-header-inner">
-    <h1 class="app-title">
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
-        <circle cx="7.5" cy="10.5" r="1" fill="currentColor"/><circle cx="10.5" cy="7.5" r="1" fill="currentColor"/>
-        <circle cx="14.5" cy="7.5" r="1" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1" fill="currentColor"/>
-      </svg>
-      Screenshot Color Picker
-    </h1>
-    <p class="app-subtitle">Extract palettes · Build textures · Export</p>
+    <h1 class="app-title">Screenshot Color Picker</h1>
   </div>
 </header>
 
@@ -41,34 +33,32 @@
   <!-- ── Workspace (50/50) ──────────────────────────────────────── -->
   <div class="workspace" id="workspace" hidden>
 
-    <!-- Left: Image Preview -->
-    <section class="card workspace-preview" id="previewSection">
-      <div class="preview-bar">
-        <span class="file-name" id="fileName"></span>
-        <div class="preview-bar-end">
-          <span class="control-label">Fit</span>
-          <div class="btn-group">
-            <button class="btn-group-item active" id="fitContain" type="button">Contain</button>
-            <button class="btn-group-item" id="fitCover"   type="button">Cover</button>
+    <!-- Left: Image Preview + Session Images -->
+    <div class="workspace-left">
+      <section class="card workspace-preview" id="previewSection">
+        <div class="preview-bar">
+          <span class="file-name" id="fileName"></span>
+          <div class="preview-bar-end">
+            <span class="control-label">Fit</span>
+            <div class="btn-group">
+              <button class="btn-group-item active" id="fitContain" type="button">Contain</button>
+              <button class="btn-group-item" id="fitCover"   type="button">Cover</button>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="changeImageBtn" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              Add Image
+            </button>
           </div>
-          <button class="btn btn-ghost btn-sm" id="changeImageBtn" type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-            Add Image
-          </button>
         </div>
-      </div>
-      <div class="image-container" id="imageContainer">
-        <img id="previewImage" src="" alt="Screenshot preview">
-      </div>
-    </section>
+        <div class="image-container" id="imageContainer">
+          <img id="previewImage" src="" alt="Screenshot preview">
+        </div>
+      </section>
 
-    <!-- Right: Sidebar -->
-    <div class="workspace-sidebar">
-
-      <!-- ── Session Images ──────────────────────────────────────── -->
+      <!-- ── Session Images ────────────────────────────────────────── -->
       <section class="card" id="historySection">
         <div class="card-header">
           <h2 class="card-title">Session Images</h2>
@@ -76,6 +66,10 @@
         </div>
         <div class="history-strip" id="historyStrip"></div>
       </section>
+    </div><!-- /workspace-left -->
+
+    <!-- Right: Sidebar -->
+    <div class="workspace-sidebar">
 
       <!-- ── Extraction Options ──────────────────────────────────── -->
       <section class="card" id="optionsSection">
@@ -165,11 +159,11 @@
           <div class="card-header-end">
             <span class="control-label">Grid</span>
             <div class="btn-group">
-              <button class="btn-group-item active size-tex" data-n="4"  type="button">4×4</button>
-              <button class="btn-group-item        size-tex" data-n="8"  type="button">8×8</button>
-              <button class="btn-group-item        size-tex" data-n="16" type="button">16×16</button>
-              <button class="btn-group-item        size-tex" data-n="32" type="button">32×32</button>
+              <button class="btn-group-item active size-tex" data-n="4"  type="button">4</button>
+              <button class="btn-group-item        size-tex" data-n="8"  type="button">8</button>
+              <button class="btn-group-item        size-tex" data-n="16" type="button">16</button>
             </div>
+            <input type="number" id="texGridSize" class="tex-grid-input" min="1" max="64" value="4" aria-label="Custom grid size">
             <button class="btn btn-ghost btn-sm" id="clearTextureBtn" type="button">Clear</button>
           </div>
         </div>
@@ -190,9 +184,10 @@
           <div class="option-group">
             <label class="option-label">Export size</label>
             <div class="btn-group">
-              <button class="btn-group-item active tex-sz-btn" data-size="256"  type="button">256×256</button>
-              <button class="btn-group-item        tex-sz-btn" data-size="512"  type="button">512×512</button>
-              <button class="btn-group-item        tex-sz-btn" data-size="1024" type="button">1024×1024</button>
+              <button class="btn-group-item active tex-sz-btn" data-size="256"  type="button">256</button>
+              <button class="btn-group-item        tex-sz-btn" data-size="512"  type="button">512</button>
+              <button class="btn-group-item        tex-sz-btn" data-size="1024" type="button">1024</button>
+              <button class="btn-group-item        tex-sz-btn" data-size="2048" type="button">2048</button>
             </div>
           </div>
           <button class="btn btn-primary" id="exportTextureBtn" type="button">
@@ -247,6 +242,7 @@
 
     </div><!-- /workspace-sidebar -->
   </div><!-- /workspace -->
+
 
 </main>
 

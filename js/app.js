@@ -59,6 +59,7 @@ const toastEl          = $('toast');
 const historyStrip     = $('historyStrip');
 const historyCount     = $('historyCount');
 const textureGrid      = $('textureGrid');
+const texGridSizeInput = $('texGridSize');
 const clearTextureBtn  = $('clearTextureBtn');
 const exportTextureBtn = $('exportTextureBtn');
 
@@ -550,13 +551,28 @@ function renderTextureGrid() {
   });
 }
 
-/* Grid size buttons */
+/* Grid size preset buttons — also sync the number input */
 $$('.size-tex').forEach(btn =>
   btn.addEventListener('click', () => {
-    resizeTexture(parseInt(btn.dataset.n, 10));
+    const n = parseInt(btn.dataset.n, 10);
+    texGridSizeInput.value = n;
+    resizeTexture(n);
     activateInGroup(btn, $$('.size-tex'));
   })
 );
+
+/* Custom grid size input */
+texGridSizeInput.addEventListener('change', () => {
+  let n = parseInt(texGridSizeInput.value, 10);
+  if (isNaN(n) || n < 1) n = 1;
+  if (n > 64) n = 64;
+  texGridSizeInput.value = n;
+  resizeTexture(n);
+  // Deactivate preset buttons if value doesn't match any preset
+  $$('.size-tex').forEach(btn =>
+    btn.classList.toggle('active', parseInt(btn.dataset.n, 10) === n)
+  );
+});
 
 /* Clear texture */
 clearTextureBtn.addEventListener('click', () => {
