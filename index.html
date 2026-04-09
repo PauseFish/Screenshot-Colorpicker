@@ -18,20 +18,18 @@
       </svg>
       Screenshot Color Picker
     </h1>
-    <p class="app-subtitle">Upload a screenshot to extract its dominant color palette</p>
+    <p class="app-subtitle">Extract palettes · Build textures · Export</p>
   </div>
 </header>
 
 <main class="app-main">
 
-  <!-- ── Upload (shown before image load) ───────────────────────── -->
+  <!-- ── Upload ─────────────────────────────────────────────────── -->
   <section class="card" id="uploadSection">
     <div class="drop-zone" id="dropZone">
       <div class="drop-zone-icon">
         <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="3" y="3" width="18" height="18" rx="2"/>
-          <circle cx="8.5" cy="8.5" r="1.5"/>
-          <path d="M21 15l-5-5L5 21"/>
+          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
         </svg>
       </div>
       <p class="drop-zone-title">Drop your screenshot here</p>
@@ -40,7 +38,7 @@
     </div>
   </section>
 
-  <!-- ── Workspace (50/50 layout after image load) ──────────────── -->
+  <!-- ── Workspace (50/50) ──────────────────────────────────────── -->
   <div class="workspace" id="workspace" hidden>
 
     <!-- Left: Image Preview -->
@@ -51,14 +49,14 @@
           <span class="control-label">Fit</span>
           <div class="btn-group">
             <button class="btn-group-item active" id="fitContain" type="button">Contain</button>
-            <button class="btn-group-item" id="fitCover" type="button">Cover</button>
+            <button class="btn-group-item" id="fitCover"   type="button">Cover</button>
           </div>
           <button class="btn btn-ghost btn-sm" id="changeImageBtn" type="button">
             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
             </svg>
-            Change Image
+            Add Image
           </button>
         </div>
       </div>
@@ -67,10 +65,19 @@
       </div>
     </section>
 
-    <!-- Right: Sidebar (Options → Palette → Export) -->
+    <!-- Right: Sidebar -->
     <div class="workspace-sidebar">
 
-      <!-- Extraction Options -->
+      <!-- ── Session Images ──────────────────────────────────────── -->
+      <section class="card" id="historySection">
+        <div class="card-header">
+          <h2 class="card-title">Session Images</h2>
+          <span class="control-label" id="historyCount"></span>
+        </div>
+        <div class="history-strip" id="historyStrip"></div>
+      </section>
+
+      <!-- ── Extraction Options ──────────────────────────────────── -->
       <section class="card" id="optionsSection">
         <div class="card-header">
           <h2 class="card-title">Extraction Options</h2>
@@ -108,18 +115,9 @@
             <div class="option-group">
               <label class="option-label">Ignore colors</label>
               <div class="check-stack">
-                <label class="check-item">
-                  <input type="checkbox" id="ignoreNearWhite">
-                  <span>Near-white (r,g,b &gt; 220)</span>
-                </label>
-                <label class="check-item">
-                  <input type="checkbox" id="ignoreNearBlack">
-                  <span>Near-black (r,g,b &lt; 35)</span>
-                </label>
-                <label class="check-item">
-                  <input type="checkbox" id="ignoreGray">
-                  <span>Grays &amp; neutrals (low saturation)</span>
-                </label>
+                <label class="check-item"><input type="checkbox" id="ignoreNearWhite"><span>Near-white (r,g,b &gt; 220)</span></label>
+                <label class="check-item"><input type="checkbox" id="ignoreNearBlack"><span>Near-black (r,g,b &lt; 35)</span></label>
+                <label class="check-item"><input type="checkbox" id="ignoreGray"><span>Grays &amp; neutrals</span></label>
               </div>
             </div>
 
@@ -127,15 +125,17 @@
           <button class="btn btn-primary" id="extractBtn" type="button">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
-              <circle cx="7.5" cy="10.5" r="1" fill="currentColor"/><circle cx="10.5" cy="7.5" r="1" fill="currentColor"/>
-              <circle cx="14.5" cy="7.5" r="1" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1" fill="currentColor"/>
+              <circle cx="7.5"  cy="10.5" r="1" fill="currentColor"/>
+              <circle cx="10.5" cy="7.5"  r="1" fill="currentColor"/>
+              <circle cx="14.5" cy="7.5"  r="1" fill="currentColor"/>
+              <circle cx="17.5" cy="10.5" r="1" fill="currentColor"/>
             </svg>
             Extract Colors
           </button>
         </div>
       </section>
 
-      <!-- Extracted Palette -->
+      <!-- ── Extracted Palette ───────────────────────────────────── -->
       <section class="card" id="paletteSection" hidden>
         <div class="card-header">
           <h2 class="card-title">Extracted Palette</h2>
@@ -143,7 +143,7 @@
             <span class="control-label">View</span>
             <div class="btn-group">
               <button class="btn-group-item active" id="viewSwatches" type="button">Swatches</button>
-              <button class="btn-group-item" id="viewList" type="button">List</button>
+              <button class="btn-group-item"        id="viewList"     type="button">List</button>
             </div>
             <button class="btn btn-ghost btn-sm" id="copyAllBtn" type="button">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -154,42 +154,86 @@
             </button>
           </div>
         </div>
+        <!-- Swatches injected by JS. Drag them or click + to add to texture. -->
         <div class="palette-grid" id="paletteGrid"></div>
       </section>
 
-      <!-- Export Palette -->
+      <!-- ── Texture Builder ─────────────────────────────────────── -->
+      <section class="card" id="textureSection">
+        <div class="card-header">
+          <h2 class="card-title">Texture Builder</h2>
+          <div class="card-header-end">
+            <span class="control-label">Grid</span>
+            <div class="btn-group">
+              <button class="btn-group-item active size-tex" data-n="4"  type="button">4×4</button>
+              <button class="btn-group-item        size-tex" data-n="8"  type="button">8×8</button>
+              <button class="btn-group-item        size-tex" data-n="16" type="button">16×16</button>
+              <button class="btn-group-item        size-tex" data-n="32" type="button">32×32</button>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="clearTextureBtn" type="button">Clear</button>
+          </div>
+        </div>
+        <div class="texture-hint">
+          Drag colors from the palette — or click <strong>+</strong> — to fill slots. Drag within the grid to reorder.
+        </div>
+        <div class="texture-grid-wrap">
+          <div class="texture-grid" id="textureGrid"></div>
+        </div>
+        <div class="texture-export-row">
+          <div class="option-group">
+            <label class="option-label">Format</label>
+            <div class="btn-group">
+              <button class="btn-group-item active tex-fmt-btn" data-format="png" type="button">PNG</button>
+              <button class="btn-group-item        tex-fmt-btn" data-format="svg" type="button">SVG</button>
+            </div>
+          </div>
+          <div class="option-group">
+            <label class="option-label">Export size</label>
+            <div class="btn-group">
+              <button class="btn-group-item active tex-sz-btn" data-size="256"  type="button">256×256</button>
+              <button class="btn-group-item        tex-sz-btn" data-size="512"  type="button">512×512</button>
+              <button class="btn-group-item        tex-sz-btn" data-size="1024" type="button">1024×1024</button>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="exportTextureBtn" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export Texture
+          </button>
+        </div>
+      </section>
+
+      <!-- ── Export Extracted Palette ───────────────────────────── -->
       <section class="card" id="exportSection" hidden>
         <div class="card-header">
           <h2 class="card-title">Export Palette</h2>
         </div>
         <div class="card-body">
           <div class="export-row">
-
             <div class="option-group">
               <label class="option-label">Format</label>
               <div class="btn-group">
                 <button class="btn-group-item active format-btn" data-format="png" type="button">PNG</button>
-                <button class="btn-group-item format-btn" data-format="svg" type="button">SVG</button>
+                <button class="btn-group-item        format-btn" data-format="svg" type="button">SVG</button>
               </div>
             </div>
-
             <div class="option-group">
               <label class="option-label">Size</label>
               <div class="btn-group">
-                <button class="btn-group-item active size-btn" data-size="256" type="button">256 × 256</button>
-                <button class="btn-group-item size-btn" data-size="512" type="button">512 × 512</button>
-                <button class="btn-group-item size-btn" data-size="1024" type="button">1024 × 1024</button>
+                <button class="btn-group-item active size-btn" data-size="256"  type="button">256×256</button>
+                <button class="btn-group-item        size-btn" data-size="512"  type="button">512×512</button>
+                <button class="btn-group-item        size-btn" data-size="1024" type="button">1024×1024</button>
               </div>
             </div>
-
             <div class="option-group">
               <label class="option-label">Layout</label>
               <div class="btn-group">
-                <button class="btn-group-item active layout-btn" data-layout="grid" type="button">Grid</button>
-                <button class="btn-group-item layout-btn" data-layout="strips" type="button">Strips</button>
+                <button class="btn-group-item active layout-btn" data-layout="grid"   type="button">Grid</button>
+                <button class="btn-group-item        layout-btn" data-layout="strips" type="button">Strips</button>
               </div>
             </div>
-
           </div>
           <button class="btn btn-primary" id="exportBtn" type="button">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
