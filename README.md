@@ -21,6 +21,10 @@ A fully client-side tool for extracting colour palettes from screenshots and bui
 
 ![Detail view](docs/screenshot-detail.jpg)
 
+### Example texture export
+
+![Texture export example](docs/screenshot-texture-export.png)
+
 ---
 
 ## How to use
