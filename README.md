@@ -2,7 +2,7 @@
 
 A fully client-side tool for extracting colour palettes from screenshots and building texture swatches. No server, no dependencies, no install.
 
-<img src="docs/screenshot-overview.png" width="477">
+<img src="docs/screenshot-overview.png" width="100%">
 
 ---
 
